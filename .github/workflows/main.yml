@@ -16,7 +16,8 @@ jobs:
       - name: Install Dependencies
         run: |
           sudo apt update
-          sudo apt install -y clang llvm lld bc git flex bison build-essential zip curl libssl-dev ccache
+          sudo apt install -y clang llvm lld bc git flex bison build-essential zip curl libssl-dev ccache \
+                              gcc-arm-linux-gnueabihf
 
       - name: Install WeebX Clang
         run: |
@@ -28,7 +29,7 @@ jobs:
           export ARCH=arm64
           export PATH=$(pwd)/toolchain/bin:$PATH
           export CROSS_COMPILE=$(pwd)/toolchain/bin/aarch64-linux-gnu-
-          export CROSS_COMPILE_ARM32=$(pwd)/toolchain/bin/arm-linux-gnueabi-
+          export CROSS_COMPILE_ARM32=arm-linux-gnueabihf-
           make O=out mido_defconfig
           make -j$(nproc) O=out
 
