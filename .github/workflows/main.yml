@@ -26,7 +26,9 @@ jobs:
       - name: Build Kernel
         run: |
           export ARCH=arm64
+          export PATH=$(pwd)/toolchain/bin:$PATH
           export CROSS_COMPILE=$(pwd)/toolchain/bin/aarch64-linux-gnu-
+          export CROSS_COMPILE_ARM32=$(pwd)/toolchain/bin/arm-linux-gnueabi-
           make O=out mido_defconfig
           make -j$(nproc) O=out
 
