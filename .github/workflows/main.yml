@@ -44,14 +44,14 @@ jobs:
 
       - name: Upload Flashable ZIP
         if: success()
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v4
         with:
           name: Mido-Kernel-ZIP
           path: mido-kernel.zip
 
       - name: Upload Build Logs (If Failed)
         if: failure()
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v4
         with:
           name: Build-Logs
           path: "*.log"
