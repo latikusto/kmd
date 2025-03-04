@@ -1,1 +1,57 @@
+name: Build Mido Kernel
 
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    name: "Build Kernel for Mido"
+    steps:
+      - name: Checkout Kernel Source
+        uses: actions/checkout@v2
+        with:
+          fetch-depth: 1
+          
+      - name: Install Dependencies
+        run: |
+          sudo apt update
+          sudo apt install -y clang llvm lld bc git flex bison build-essential zip curl libssl-dev ccache
+
+      - name: Install WeebX Clang
+        run: |
+          wget https://github.com/XSans0/WeebX-Clang/releases/download/WeebX-Clang-18.1.8-release/WeebX-Clang-18.1.8.tar.gz -O "weebx-clang.tar.gz"
+          mkdir toolchain && tar -xvf weebx-clang.tar.gz -C toolchain && rm -rf weebx-clang.tar.gz
+
+      - name: Build Kernel
+        run: |
+          export ARCH=arm64
+          export CROSS_COMPILE=$(pwd)/toolchain/bin/aarch64-linux-gnu-
+          make O=out mido_defconfig
+          make -j$(nproc) O=out
+
+      - name: Clone AnyKernel3
+        run: |
+          git clone --depth=1 https://github.com/osm0sis/AnyKernel3.git anykernel
+          rm -rf anykernel/.git  # Remove git history to keep it clean
+
+      - name: Prepare Flashable ZIP
+        run: |
+          cp out/arch/arm64/boot/Image.gz-dtb anykernel/
+          cd anykernel
+          zip -r9 ../mido-kernel.zip ./*
+          cd ..
+
+      - name: Upload Flashable ZIP
+        if: success()
+        uses: actions/upload-artifact@v2
+        with:
+          name: Mido-Kernel-ZIP
+          path: mido-kernel.zip
+
+      - name: Upload Build Logs (If Failed)
+        if: failure()
+        uses: actions/upload-artifact@v2
+        with:
+          name: Build-Logs
+          path: "*.log"
